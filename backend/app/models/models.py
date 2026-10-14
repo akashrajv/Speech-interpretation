@@ -215,8 +215,9 @@ class GeminiInterpretation(Base):
 
     id = Column(String(36), primary_key=True, default=generate_uuid)
     analysis_id = Column(String(36), ForeignKey("speech_analyses.id", ondelete="CASCADE"), nullable=False)
-    model_used = Column(String(100), default="gemini-2.5-flash")
+    model_used = Column(String(100), default="gemini-3.5-flash-lite")
     summary = Column(Text, nullable=False)
+    speech_context_json = Column(Text, nullable=True)
     strengths_json = Column(Text, nullable=True)
     interpretations_json = Column(Text, nullable=True)
     overall_recommendations_json = Column(Text, nullable=True)

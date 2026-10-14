@@ -51,6 +51,16 @@ export const getAnalysisFlaws = async (id: string): Promise<FlawItem[]> => {
   return res.data;
 };
 
+export const autoTranscribeAudio = async (audioFile: File, speechCategory?: string): Promise<{ transcript: string; word_count: number }> => {
+  const formData = new FormData();
+  formData.append('audio', audioFile);
+  if (speechCategory) formData.append('speech_category', speechCategory);
+  const res = await api.post('/transcribe', formData, {
+    headers: { 'Content-Type': 'multipart/form-data' }
+  });
+  return res.data;
+};
+
 export const createAnalysis = async (formData: FormData): Promise<{ analysis_id: string; status: string }> => {
   const res = await api.post('/analyses', formData, {
     headers: { 'Content-Type': 'multipart/form-data' }

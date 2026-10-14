@@ -38,6 +38,7 @@ from backend.app.schemas.schemas import (
     EvidenceItem,
     RubricScoreBreakdown,
     DimensionScore,
+    SpeechContextAnalysis,
     GeminiInterpretationResponse,
     FlawInterpretation,
     DatasetSampleCreate,
@@ -152,12 +153,41 @@ def get_dashboard_summary(db: Session = Depends(get_db)):
     }
 
 # --- Speech Analysis Endpoints ---
+@router.post("/transcribe")
+async def transcribe_audio_endpoint(
+    audio: UploadFile = File(...),
+    speech_category: str = Form("Persuasive Oratory")
+):
+    """Auto-transcribes speech audio using Gemini multimodal transcription with acoustic fallback."""
+    from backend.app.audio.transcription import auto_transcribe_audio
+    temp_id = str(uuid.uuid4())
+    ext = os.path.splitext(audio.filename)[1].lower() or ".wav"
+    temp_path = os.path.join(settings.AUDIO_STORAGE_DIR, f"temp_transcribe_{temp_id}{ext}")
+
+    os.makedirs(settings.AUDIO_STORAGE_DIR, exist_ok=True)
+    with open(temp_path, "wb") as f:
+        shutil.copyfileobj(audio.file, f)
+
+    try:
+        transcript = auto_transcribe_audio(temp_path, speech_category)
+        return {
+            "transcript": transcript,
+            "word_count": len(transcript.split()),
+            "status": "success"
+        }
+    finally:
+        if os.path.exists(temp_path):
+            try:
+                os.remove(temp_path)
+            except Exception:
+                pass
+
 @router.post("/analyses")
 async def create_analysis(
     background_tasks: BackgroundTasks,
     participant_audio: UploadFile = File(...),
     reference_audio: Optional[UploadFile] = File(None),
-    transcript_text: str = Form(...),
+    transcript_text: Optional[str] = Form(""),
     title: str = Form("Competitive Speech Evaluation"),
     speech_category: str = Form("Persuasive Oratory"),
     speaker_id: Optional[str] = Form(None),
@@ -230,6 +260,7 @@ async def create_analysis(
 
 @router.post("/analyses/sample")
 def load_sample_analysis(
+    background_tasks: BackgroundTasks,
     sample_key: str = Query("script_1", description="script_1 (Hamlet) or script_2 (Oratory)"),
     db: Session = Depends(get_db)
 ):
@@ -252,20 +283,27 @@ def load_sample_analysis(
     db.add(analysis)
     db.commit()
 
-    # Run synchronously so user sees immediate results
-    analysis = run_speech_analysis_pipeline(
-        analysis_id=analysis_id,
-        participant_audio_path=data["participant_audio"],
-        reference_audio_path=data["reference_audio"],
-        transcript_text=data["transcript"],
-        title=data["title"],
-        speech_category=data["category"],
-        speaker_id="contestant_42",
-        trigger_gemini=True,
-        db=db
-    )
+    def process_sample_job(aid: str, d: dict):
+        from backend.app.database.session import SessionLocal
+        job_db = SessionLocal()
+        try:
+            run_speech_analysis_pipeline(
+                analysis_id=aid,
+                participant_audio_path=d["participant_audio"],
+                reference_audio_path=d["reference_audio"],
+                transcript_text=d["transcript"],
+                title=d["title"],
+                speech_category=d["category"],
+                speaker_id="contestant_42",
+                trigger_gemini=True,
+                db=job_db
+            )
+        finally:
+            job_db.close()
 
-    return {"analysis_id": analysis.id, "status": analysis.status, "overall_score": analysis.overall_score}
+    background_tasks.add_task(process_sample_job, analysis_id, data)
+
+    return {"analysis_id": analysis.id, "status": "queued", "overall_score": None}
 
 @router.get("/analyses", response_model=List[AnalysisListItem])
 def list_analyses(
@@ -412,11 +450,13 @@ def get_analysis_detail(analysis_id: str, db: Session = Depends(get_db)):
     gemini_obj = None
     if analysis.gemini_interpretation:
         gi = analysis.gemini_interpretation
-        interps = [FlawInterpretation(**item) for item in json.loads(gi.interpretations_json)] if gi.interpretations_json else []
+        speech_ctx = json.loads(gi.speech_context_json) if hasattr(gi, 'speech_context_json') and gi.speech_context_json else None
+        interps = [FlawInterpretation(**interp) for interp in json.loads(gi.interpretations_json)] if gi.interpretations_json else []
         gemini_obj = GeminiInterpretationResponse(
             model_used=gi.model_used,
             is_deterministic_fallback=gi.is_deterministic_fallback,
             summary=gi.summary,
+            speech_context=SpeechContextAnalysis(**speech_ctx) if speech_ctx else None,
             strengths=json.loads(gi.strengths_json) if gi.strengths_json else [],
             interpretations=interps,
             overall_recommendations=json.loads(gi.overall_recommendations_json) if gi.overall_recommendations_json else [],

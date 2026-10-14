@@ -15,7 +15,7 @@ export const PitchContourChart: React.FC<PitchContourChartProps> = ({
 }) => {
   if (participantContour.length === 0) {
     return (
-      <div className="h-44 flex items-center justify-center text-slate-500 text-xs italic">
+      <div className="h-44 flex items-center justify-center text-slate-400 text-xs italic">
         Pitch contour data unavailable.
       </div>
     );
@@ -60,39 +60,39 @@ export const PitchContourChart: React.FC<PitchContourChartProps> = ({
 
   return (
     <div className="space-y-2">
-      <div className="flex items-center justify-between text-xs text-slate-400">
+      <div className="flex items-center justify-between text-xs text-slate-600">
         <div className="flex items-center gap-4">
-          <span className="flex items-center gap-1.5">
-            <span className="w-2.5 h-0.5 bg-indigo-400 rounded" />
-            Participant F0 (Hz)
+          <span className="flex items-center gap-1.5 font-medium">
+            <span className="w-2.5 h-0.5 bg-blue-900 rounded" />
+            Your Tone Pitch (Hz)
           </span>
           {referenceContour.length > 0 && (
-            <span className="flex items-center gap-1.5">
-              <span className="w-2.5 h-0.5 bg-emerald-400 rounded" />
-              Reference F0 (Hz)
+            <span className="flex items-center gap-1.5 font-medium">
+              <span className="w-2.5 h-0.5 bg-emerald-600 rounded" />
+              Reference Pitch (Hz)
             </span>
           )}
         </div>
         <span className="text-[11px] text-slate-500 font-mono">
-          Range: {minF0.toFixed(0)}Hz – {maxF0.toFixed(0)}Hz (YIN estimated)
+          Range: {minF0.toFixed(0)}Hz – {maxF0.toFixed(0)}Hz
         </span>
       </div>
 
-      <div className="h-44 bg-slate-950/70 rounded-lg p-3 border border-slate-800 relative">
+      <div className="h-44 bg-slate-50 rounded-lg p-3 border border-slate-200 relative">
         <svg viewBox="0 0 1000 180" className="w-full h-full overflow-visible">
           {/* Horizontal gridlines */}
-          <line x1="0" y1="30" x2="1000" y2="30" stroke="#1e293b" strokeDasharray="3,3" />
-          <line x1="0" y1="90" x2="1000" y2="90" stroke="#1e293b" strokeDasharray="3,3" />
-          <line x1="0" y1="150" x2="1000" y2="150" stroke="#1e293b" strokeDasharray="3,3" />
+          <line x1="0" y1="30" x2="1000" y2="30" stroke="#cbd5e1" strokeDasharray="3,3" />
+          <line x1="0" y1="90" x2="1000" y2="90" stroke="#cbd5e1" strokeDasharray="3,3" />
+          <line x1="0" y1="150" x2="1000" y2="150" stroke="#cbd5e1" strokeDasharray="3,3" />
 
           {/* Reference path */}
           {refPath && (
             <path
               d={refPath}
               fill="none"
-              stroke="#10b981"
+              stroke="#059669"
               strokeWidth="2.5"
-              strokeOpacity="0.55"
+              strokeOpacity="0.65"
               strokeLinecap="round"
               strokeLinejoin="round"
             />
@@ -103,7 +103,7 @@ export const PitchContourChart: React.FC<PitchContourChartProps> = ({
             <path
               d={partPath}
               fill="none"
-              stroke="#818cf8"
+              stroke="#1e3a8a"
               strokeWidth="2.5"
               strokeLinecap="round"
               strokeLinejoin="round"

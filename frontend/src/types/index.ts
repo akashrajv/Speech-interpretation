@@ -88,10 +88,17 @@ export interface RubricScoreBreakdown {
   scoring_version: string;
 }
 
+export interface SpeechContextAnalysis {
+  theme_and_intent: string;
+  dramatic_or_rhetorical_stakes: string;
+  contextual_delivery_advice: string;
+}
+
 export interface FlawInterpretation {
   flaw_id: string;
   explanation: string;
   impact: string;
+  contextual_significance?: string;
   recommendations: string[];
   practice_exercise: string;
   priority: string;
@@ -101,6 +108,7 @@ export interface GeminiInterpretationResponse {
   model_used: string;
   is_deterministic_fallback: boolean;
   summary: string;
+  speech_context?: SpeechContextAnalysis;
   strengths: string[];
   interpretations: FlawInterpretation[];
   overall_recommendations: string[];

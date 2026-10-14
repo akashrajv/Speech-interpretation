@@ -102,6 +102,11 @@ def run_speech_analysis_pipeline(
             db.add(ref_rec)
 
         # 3. Transcript Handling
+        if not transcript_text or not transcript_text.strip():
+            logger.info("Transcript omitted by user. Auto-generating transcript from participant audio...")
+            from backend.app.audio.transcription import auto_transcribe_audio
+            transcript_text = auto_transcribe_audio(participant_audio_path, speech_category)
+
         display_words, clean_words = normalize_transcript(transcript_text)
         word_count = len(clean_words)
 
@@ -361,6 +366,7 @@ def run_speech_analysis_pipeline(
             analysis_id=analysis_id,
             model_used=gemini_res["model_used"],
             summary=gemini_res["summary"],
+            speech_context_json=json.dumps(gemini_res.get("speech_context")) if gemini_res.get("speech_context") else None,
             strengths_json=json.dumps(gemini_res.get("strengths", [])),
             interpretations_json=json.dumps(gemini_res.get("interpretations", [])),
             overall_recommendations_json=json.dumps(gemini_res.get("overall_recommendations", [])),

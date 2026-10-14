@@ -25,6 +25,7 @@ import { PitchContourChart } from '../charts/PitchContourChart';
 import { LoudnessChart } from '../charts/LoudnessChart';
 import { PauseTimelineChart } from '../charts/PauseTimelineChart';
 import { SpectrogramChart } from '../charts/SpectrogramChart';
+import { SpeechContextCard } from '../components/SpeechContextCard';
 
 export const AnalysisResultsPage: React.FC = () => {
   const { id } = useParams<{ id: string }>();
@@ -71,12 +72,12 @@ export const AnalysisResultsPage: React.FC = () => {
   if (loading && (!analysis || analysis.status !== 'completed')) {
     return (
       <div className="h-96 flex flex-col items-center justify-center space-y-4">
-        <div className="w-10 h-10 border-3 border-indigo-500 border-t-transparent rounded-full animate-spin" />
+        <div className="w-10 h-10 border-3 border-blue-900 border-t-transparent rounded-full animate-spin" />
         <div className="text-center space-y-1">
-          <div className="text-base font-bold text-white">
+          <div className="text-base font-bold text-blue-950">
             {analysis?.status === 'processing' ? 'Extracting Acoustic Features & Temporal Flaws...' : 'Evaluating Speech Recording...'}
           </div>
-          <p className="text-xs text-slate-400">
+          <p className="text-xs text-slate-500">
             Running VAD, YIN pitch estimation, forced syllable alignment, and rubric scoring.
           </p>
         </div>
@@ -88,8 +89,8 @@ export const AnalysisResultsPage: React.FC = () => {
     return (
       <div className="p-8 text-center space-y-3">
         <AlertTriangle className="w-8 h-8 text-rose-500 mx-auto" />
-        <div className="text-white font-bold">Analysis Not Found</div>
-        <Link to="/" className="text-xs text-indigo-400 hover:underline">
+        <div className="text-blue-950 font-bold">Analysis Not Found</div>
+        <Link to="/" className="text-xs text-blue-900 hover:underline">
           Return to Dashboard
         </Link>
       </div>
@@ -105,26 +106,26 @@ export const AnalysisResultsPage: React.FC = () => {
   return (
     <div className="space-y-6">
       {/* Top Header & Export Toolbar */}
-      <div className="flex flex-col md:flex-row items-start md:items-center justify-between gap-4 border-b border-slate-800 pb-5">
+      <div className="flex flex-col md:flex-row items-start md:items-center justify-between gap-4 border-b border-slate-200 pb-5">
         <div className="space-y-1">
           <div className="flex items-center gap-2">
             <Link
               to="/history"
-              className="p-1 rounded-lg hover:bg-slate-800 text-slate-400 hover:text-white transition"
+              className="p-1 rounded-lg hover:bg-slate-100 text-slate-500 hover:text-blue-950 transition"
             >
               <ArrowLeft className="w-4 h-4" />
             </Link>
-            <h1 className="text-2xl font-bold text-white tracking-tight">{analysis.title}</h1>
-            <span className="text-[10px] px-2 py-0.5 rounded-full font-semibold bg-indigo-500/10 text-indigo-300 border border-indigo-500/30 font-mono">
+            <h1 className="text-2xl font-bold text-blue-950 tracking-tight">{analysis.title}</h1>
+            <span className="text-[10px] px-2 py-0.5 rounded-full font-bold bg-blue-50 text-blue-900 border border-blue-200 font-mono">
               {analysis.speech_category}
             </span>
           </div>
-          <div className="text-xs text-slate-400 flex items-center gap-3">
+          <div className="text-xs text-slate-500 flex items-center gap-3">
             <span>Evaluated: {new Date(analysis.created_at).toLocaleString()}</span>
             <span>•</span>
             <span>Duration: {analysis.duration_seconds.toFixed(1)}s</span>
             <span>•</span>
-            <span className="font-semibold text-rose-400">{analysis.flaws.length} Flaws Detected</span>
+            <span className="font-semibold text-rose-600">{analysis.flaws.length} Flaws Detected</span>
           </div>
         </div>
 
@@ -133,7 +134,7 @@ export const AnalysisResultsPage: React.FC = () => {
           <a
             href={getExportUrl(analysis.id, 'json')}
             download
-            className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-slate-800 hover:bg-slate-700 text-slate-200 border border-slate-700 text-xs font-semibold transition"
+            className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-slate-100 hover:bg-slate-200 text-slate-700 border border-slate-300 text-xs font-semibold transition"
           >
             <Download className="w-3.5 h-3.5" />
             <span>Export JSON</span>
@@ -141,7 +142,7 @@ export const AnalysisResultsPage: React.FC = () => {
           <a
             href={getExportUrl(analysis.id, 'csv')}
             download
-            className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-slate-800 hover:bg-slate-700 text-slate-200 border border-slate-700 text-xs font-semibold transition"
+            className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-slate-100 hover:bg-slate-200 text-slate-700 border border-slate-300 text-xs font-semibold transition"
           >
             <Download className="w-3.5 h-3.5" />
             <span>Export CSV</span>
@@ -151,6 +152,15 @@ export const AnalysisResultsPage: React.FC = () => {
 
       {/* Rubric Gauge Section */}
       {analysis.rubric_score && <RubricGauge rubric={analysis.rubric_score} />}
+
+      {/* Gemini Rhetorical Context & Speech Intent Analysis */}
+      {analysis.gemini_interpretation && (
+        <SpeechContextCard
+          interpretation={analysis.gemini_interpretation}
+          speechCategory={analysis.speech_category}
+          transcriptText={analysis.transcript}
+        />
+      )}
 
       {/* Synchronized Dual Audio Waveforms */}
       <div className="space-y-3">
@@ -188,36 +198,36 @@ export const AnalysisResultsPage: React.FC = () => {
 
       {/* Analysis Tabs */}
       <div className="space-y-4">
-        <div className="flex items-center gap-2 border-b border-slate-800 pb-2">
+        <div className="flex items-center gap-2 border-b border-slate-200 pb-2">
           <button
             onClick={() => setActiveTab('flaws')}
             className={`px-3.5 py-1.5 rounded-lg text-xs font-semibold transition ${
               activeTab === 'flaws'
-                ? 'bg-indigo-600 text-white'
-                : 'text-slate-400 hover:text-slate-200 hover:bg-slate-800/60'
+                ? 'bg-blue-900 text-white shadow-sm'
+                : 'text-slate-600 hover:text-blue-950 hover:bg-blue-50/70'
             }`}
           >
-            Detected Flaws ({analysis.flaws.length})
+            Speech Issues to Fix ({analysis.flaws.length})
           </button>
           <button
             onClick={() => setActiveTab('charts')}
             className={`px-3.5 py-1.5 rounded-lg text-xs font-semibold transition ${
               activeTab === 'charts'
-                ? 'bg-indigo-600 text-white'
-                : 'text-slate-400 hover:text-slate-200 hover:bg-slate-800/60'
+                ? 'bg-blue-900 text-white shadow-sm'
+                : 'text-slate-600 hover:text-blue-950 hover:bg-blue-50/70'
             }`}
           >
-            Acoustic Feature Charts
+            Voice Charts (Speed, Pitch, Volume)
           </button>
           <button
             onClick={() => setActiveTab('transcript')}
             className={`px-3.5 py-1.5 rounded-lg text-xs font-semibold transition ${
               activeTab === 'transcript'
-                ? 'bg-indigo-600 text-white'
-                : 'text-slate-400 hover:text-slate-200 hover:bg-slate-800/60'
+                ? 'bg-blue-900 text-white shadow-sm'
+                : 'text-slate-600 hover:text-blue-950 hover:bg-blue-50/70'
             }`}
           >
-            Transcript & Word Alignment
+            Words & Timing
           </button>
         </div>
 
@@ -228,50 +238,74 @@ export const AnalysisResultsPage: React.FC = () => {
               <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
                 {analysis.flaws.map((flaw) => {
                   const isSelected = selectedFlaw?.flaw_id === flaw.flaw_id;
+                  const flawInterp = analysis.gemini_interpretation?.interpretations?.find(
+                    (i) => i.flaw_id === flaw.flaw_id
+                  );
+
+                  const getFriendlyName = (cat: string) => {
+                    const l = cat.toLowerCase();
+                    if (l.includes('rate') || l.includes('fast')) return 'Speaking Too Fast';
+                    if (l.includes('pause') || l.includes('silence')) return 'Unnatural Long Pause';
+                    if (l.includes('intonation') || l.includes('pitch')) return 'Monotone / Flat Tone';
+                    if (l.includes('loudness') || l.includes('volume')) return 'Volume Fading Away';
+                    if (l.includes('pronunciation')) return 'Word Articulation Issue';
+                    return cat.replace(/_/g, ' ');
+                  };
+
                   return (
                     <div
                       key={flaw.flaw_id}
                       onClick={() => setSelectedFlaw(flaw)}
                       className={`p-4 rounded-xl border cursor-pointer transition-all ${
                         isSelected
-                          ? 'bg-indigo-950/40 border-indigo-500 shadow-md ring-1 ring-indigo-500'
-                          : 'bg-slate-900/60 border-slate-800 hover:border-slate-700 hover:bg-slate-800/40'
+                          ? 'bg-blue-50/60 border-blue-600 shadow-sm ring-1 ring-blue-600'
+                          : 'bg-white border-slate-200 hover:border-blue-400 hover:bg-slate-50/60 shadow-xs'
                       }`}
                     >
                       <div className="flex items-center justify-between mb-2">
                         <span
                           className={`text-[10px] font-semibold font-mono uppercase px-2 py-0.5 rounded border ${
                             flaw.severity === 'high'
-                              ? 'bg-rose-500/10 text-rose-400 border-rose-500/30'
+                              ? 'bg-rose-50 text-rose-700 border-rose-200'
                               : flaw.severity === 'medium'
-                              ? 'bg-amber-500/10 text-amber-400 border-amber-500/30'
-                              : 'bg-indigo-500/10 text-indigo-400 border-indigo-500/30'
+                              ? 'bg-amber-50 text-amber-800 border-amber-200'
+                              : 'bg-blue-50 text-blue-900 border-blue-200'
                           }`}
                         >
-                          {flaw.severity}
+                          {flaw.severity} Priority
                         </span>
-                        <span className="text-[11px] text-slate-400 font-mono">
-                          {flaw.start_seconds.toFixed(2)}s – {flaw.end_seconds.toFixed(2)}s
+                        <span className="text-[11px] text-slate-500 font-mono">
+                          {flaw.start_seconds.toFixed(1)}s – {flaw.end_seconds.toFixed(1)}s
                         </span>
                       </div>
 
-                      <h4 className="text-sm font-bold text-white capitalize mb-1">
-                        {flaw.category.replace(/_/g, ' ')}
+                      <h4 className="text-sm font-bold text-blue-950 capitalize mb-1">
+                        {getFriendlyName(flaw.category)}
                       </h4>
-                      <p className="text-xs text-indigo-300 font-mono italic truncate mb-2">
+                      <p className="text-xs text-blue-900 font-mono italic truncate mb-2">
                         "{flaw.text_segment}"
                       </p>
-                      <p className="text-xs text-slate-400 line-clamp-2">
+                      <p className="text-xs text-slate-600 line-clamp-2">
                         {flaw.explanation}
                       </p>
+
+                      {flawInterp?.contextual_significance && (
+                        <div className="mt-2.5 p-2 rounded bg-blue-50/60 border border-blue-200 text-[11px] text-slate-800 flex items-start gap-1.5">
+                          <Sparkles className="w-3.5 h-3.5 text-amber-500 shrink-0 mt-0.5" />
+                          <span className="line-clamp-2">
+                            <strong className="text-blue-950">Context Impact: </strong>
+                            {flawInterp.contextual_significance}
+                          </span>
+                        </div>
+                      )}
                     </div>
                   );
                 })}
               </div>
             ) : (
-              <div className="p-8 text-center bg-slate-900/40 rounded-xl border border-slate-800 text-xs text-slate-400">
-                <CheckCircle className="w-6 h-6 text-emerald-400 mx-auto mb-2" />
-                No delivery flaws detected! Speech execution matched ideal rubric thresholds.
+              <div className="p-8 text-center bg-white rounded-xl border border-slate-200 text-xs text-slate-500 shadow-xs">
+                <CheckCircle className="w-6 h-6 text-emerald-600 mx-auto mb-2" />
+                No delivery issues detected! Speech execution matched ideal rubric thresholds.
               </div>
             )}
           </div>
@@ -281,7 +315,7 @@ export const AnalysisResultsPage: React.FC = () => {
         {activeTab === 'charts' && (
           <div className="space-y-6">
             {/* Speaking Rate Chart */}
-            <div className="bg-slate-900/60 p-5 rounded-xl border border-slate-800">
+            <div className="bg-white p-5 rounded-xl border border-slate-200 shadow-xs">
               <SpeakingRateChart
                 participantSeries={partSeries?.speaking_rate_series || []}
                 referenceSeries={refSeries?.speaking_rate_series || []}
@@ -289,7 +323,7 @@ export const AnalysisResultsPage: React.FC = () => {
             </div>
 
             {/* Pitch Contour F0 Chart */}
-            <div className="bg-slate-900/60 p-5 rounded-xl border border-slate-800">
+            <div className="bg-white p-5 rounded-xl border border-slate-200 shadow-xs">
               <PitchContourChart
                 participantTimes={partSeries?.time_stamps || []}
                 participantContour={partSeries?.pitch_contour || []}
@@ -299,7 +333,7 @@ export const AnalysisResultsPage: React.FC = () => {
             </div>
 
             {/* Loudness RMS Chart */}
-            <div className="bg-slate-900/60 p-5 rounded-xl border border-slate-800">
+            <div className="bg-white p-5 rounded-xl border border-slate-200 shadow-xs">
               <LoudnessChart
                 participantTimes={partSeries?.time_stamps || []}
                 participantRms={partSeries?.rms_envelope || []}
@@ -309,7 +343,7 @@ export const AnalysisResultsPage: React.FC = () => {
             </div>
 
             {/* Pause Timeline */}
-            <div className="bg-slate-900/60 p-5 rounded-xl border border-slate-800">
+            <div className="bg-white p-5 rounded-xl border border-slate-200 shadow-xs">
               <PauseTimelineChart
                 pauses={partSeries?.pauses || []}
                 totalDuration={analysis.duration_seconds}
@@ -318,7 +352,7 @@ export const AnalysisResultsPage: React.FC = () => {
 
             {/* Spectrogram */}
             {partSeries?.spectrogram_summary && (
-              <div className="bg-slate-900/60 p-5 rounded-xl border border-slate-800">
+              <div className="bg-white p-5 rounded-xl border border-slate-200 shadow-xs">
                 <SpectrogramChart spectrogram={partSeries.spectrogram_summary} />
               </div>
             )}
@@ -328,7 +362,7 @@ export const AnalysisResultsPage: React.FC = () => {
         {/* Tab 3: Word Alignment & Transcript */}
         {activeTab === 'transcript' && (
           <div className="space-y-4">
-            <div className="bg-slate-900/60 p-5 rounded-xl border border-slate-800">
+            <div className="bg-white p-5 rounded-xl border border-slate-200 shadow-xs">
               <WordAlignmentViewer
                 alignments={analysis.alignments_participant}
                 flaws={analysis.flaws}

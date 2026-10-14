@@ -7,13 +7,9 @@ import {
   Sparkles,
   Layers,
   ArrowRight,
-  Info,
-  Play,
-  RotateCcw,
-  CheckCircle2,
   AlertCircle
 } from 'lucide-react';
-import { createAnalysis, loadSampleAnalysis } from '../services/api';
+import { createAnalysis, autoTranscribeAudio } from '../services/api';
 
 const SPEECH_CATEGORIES = [
   'Persuasive Oratory',
@@ -41,11 +37,32 @@ export const NewAnalysisPage: React.FC = () => {
   const [refPreviewUrl, setRefPreviewUrl] = useState<string | null>(null);
 
   const [submitting, setSubmitting] = useState(false);
+  const [isTranscribing, setIsTranscribing] = useState(false);
   const [errorMsg, setErrorMsg] = useState<string | null>(null);
 
   const partInputRef = useRef<HTMLInputElement>(null);
   const refInputRef = useRef<HTMLInputElement>(null);
   const txtInputRef = useRef<HTMLInputElement>(null);
+
+  const handleAutoTranscribe = async () => {
+    if (!participantFile) {
+      setErrorMsg('Please select a speech audio recording first to auto-transcribe.');
+      return;
+    }
+    try {
+      setIsTranscribing(true);
+      setErrorMsg(null);
+      const res = await autoTranscribeAudio(participantFile, speechCategory);
+      if (res.transcript) {
+        setTranscriptText(res.transcript);
+      }
+    } catch (err: any) {
+      console.error(err);
+      setErrorMsg('Automatic speech transcription failed. You can paste or type the transcript manually.');
+    } finally {
+      setIsTranscribing(false);
+    }
+  };
 
   const handleParticipantChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     if (e.target.files && e.target.files[0]) {
@@ -105,11 +122,7 @@ export const NewAnalysisPage: React.FC = () => {
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!participantFile) {
-      setErrorMsg('Please upload a participant audio recording.');
-      return;
-    }
-    if (!transcriptText.trim()) {
-      setErrorMsg('Please provide the speech transcript text.');
+      setErrorMsg('Please upload your speech audio recording.');
       return;
     }
 
@@ -123,7 +136,7 @@ export const NewAnalysisPage: React.FC = () => {
         formData.append('reference_audio', referenceFile);
       }
       formData.append('transcript_text', transcriptText);
-      formData.append('title', title || 'Competitive Speech Evaluation');
+      formData.append('title', title || 'Speech Evaluation');
       formData.append('speech_category', speechCategory);
       if (speakerId) formData.append('speaker_id', speakerId);
       formData.append('enable_gemini_interpret', String(enableGemini));
@@ -132,7 +145,7 @@ export const NewAnalysisPage: React.FC = () => {
       navigate(`/analysis/${res.analysis_id}`);
     } catch (err: any) {
       console.error(err);
-      setErrorMsg(err.response?.data?.detail || 'Failed to submit speech analysis. Check file format & backend.');
+      setErrorMsg(err.response?.data?.detail || 'Failed to submit speech analysis. Check file format & backend connection.');
     } finally {
       setSubmitting(false);
     }
@@ -141,18 +154,18 @@ export const NewAnalysisPage: React.FC = () => {
   return (
     <div className="max-w-4xl mx-auto space-y-6">
       <div className="space-y-1">
-        <h1 className="text-2xl font-bold text-white tracking-tight">New Speech Evaluation</h1>
-        <p className="text-xs text-slate-400">
-          Upload speech recordings and transcript for temporal flaw detection and rubric-based scoring.
+        <h1 className="text-2xl font-bold text-blue-950 tracking-tight">Evaluate a Speech Recording</h1>
+        <p className="text-xs text-slate-500">
+          Upload your audio to get feedback on speed, pauses, pitch variation, loudness, and word clarity.
         </p>
       </div>
 
       {/* Preset Quick Load Helper */}
-      <div className="bg-slate-900/60 p-4 rounded-xl border border-slate-800 flex items-center justify-between gap-4">
+      <div className="bg-blue-50/70 p-4 rounded-xl border border-blue-200 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
         <div className="flex items-center gap-2.5">
-          <Sparkles className="w-4 h-4 text-amber-400 shrink-0" />
-          <div className="text-xs text-slate-300">
-            <span className="font-semibold text-white">Need sample data?</span> Click below to pre-populate competitive speech transcripts or run an instant preset benchmark.
+          <Sparkles className="w-4 h-4 text-amber-500 shrink-0" />
+          <div className="text-xs text-slate-700">
+            <span className="font-bold text-blue-950">Need a practice text?</span> Click below to automatically fill in sample speeches.
           </div>
         </div>
 
@@ -160,23 +173,23 @@ export const NewAnalysisPage: React.FC = () => {
           <button
             type="button"
             onClick={() => handleLoadPreset('script_1')}
-            className="px-3 py-1.5 rounded-lg bg-slate-800 hover:bg-slate-700 text-slate-200 border border-slate-700 text-xs font-semibold transition"
+            className="px-3 py-1.5 rounded-lg bg-white hover:bg-blue-50 text-blue-900 border border-blue-200 text-xs font-semibold shadow-xs transition"
           >
-            Load Hamlet Text
+            Hamlet Script
           </button>
           <button
             type="button"
             onClick={() => handleLoadPreset('script_2')}
-            className="px-3 py-1.5 rounded-lg bg-slate-800 hover:bg-slate-700 text-slate-200 border border-slate-700 text-xs font-semibold transition"
+            className="px-3 py-1.5 rounded-lg bg-white hover:bg-blue-50 text-blue-900 border border-blue-200 text-xs font-semibold shadow-xs transition"
           >
-            Load Oratory Text
+            Persuasion Script
           </button>
         </div>
       </div>
 
       {errorMsg && (
-        <div className="p-4 rounded-xl bg-rose-500/10 border border-rose-500/30 text-rose-300 text-xs flex items-center gap-2">
-          <AlertCircle className="w-4 h-4 text-rose-400 shrink-0" />
+        <div className="p-4 rounded-xl bg-rose-50 border border-rose-200 text-rose-700 text-xs flex items-center gap-2">
+          <AlertCircle className="w-4 h-4 text-rose-600 shrink-0" />
           <span>{errorMsg}</span>
         </div>
       )}
@@ -185,12 +198,12 @@ export const NewAnalysisPage: React.FC = () => {
         {/* Audio Upload Cards */}
         <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
           {/* Participant Audio */}
-          <div className="bg-slate-900/70 p-5 rounded-xl border border-slate-800 space-y-3">
+          <div className="bg-white p-5 rounded-xl border border-slate-200 shadow-xs space-y-3">
             <div className="flex items-center justify-between">
-              <span className="text-xs font-bold uppercase tracking-wider text-slate-200 flex items-center gap-1.5">
-                <Mic className="w-4 h-4 text-indigo-400" /> Participant Audio *
+              <span className="text-xs font-bold text-blue-950 flex items-center gap-1.5">
+                <Mic className="w-4 h-4 text-blue-900" /> Your Speech Audio *
               </span>
-              <span className="text-[10px] text-slate-400 font-mono">WAV, MP3, M4A</span>
+              <span className="text-[10px] text-slate-500 font-mono">WAV, MP3, M4A</span>
             </div>
 
             <input
@@ -205,26 +218,26 @@ export const NewAnalysisPage: React.FC = () => {
               onClick={() => partInputRef.current?.click()}
               className={`border-2 border-dashed rounded-xl p-6 text-center cursor-pointer transition ${
                 participantFile
-                  ? 'border-indigo-500/50 bg-indigo-500/5'
-                  : 'border-slate-800 hover:border-slate-700 hover:bg-slate-800/40'
+                  ? 'border-blue-600 bg-blue-50/50'
+                  : 'border-slate-300 hover:border-blue-500 hover:bg-blue-50/20'
               }`}
             >
-              <Upload className="w-6 h-6 text-indigo-400 mx-auto mb-2" />
+              <Upload className="w-6 h-6 text-blue-900 mx-auto mb-2" />
               {participantFile ? (
                 <div className="space-y-1">
-                  <div className="text-xs font-bold text-white truncate max-w-xs mx-auto">
+                  <div className="text-xs font-bold text-blue-950 truncate max-w-xs mx-auto">
                     {participantFile.name}
                   </div>
-                  <div className="text-[10px] text-slate-400 font-mono">
+                  <div className="text-[10px] text-slate-500 font-mono">
                     {(participantFile.size / (1024 * 1024)).toFixed(2)} MB
                   </div>
                 </div>
               ) : (
                 <div className="space-y-1">
-                  <div className="text-xs font-medium text-slate-300">
-                    Click to select participant recording
+                  <div className="text-xs font-medium text-slate-700">
+                    Click to select your speech audio
                   </div>
-                  <div className="text-[10px] text-slate-500">Max size 50MB, up to 10 minutes</div>
+                  <div className="text-[10px] text-slate-400">Up to 50MB, max 10 minutes</div>
                 </div>
               )}
             </div>
@@ -235,12 +248,12 @@ export const NewAnalysisPage: React.FC = () => {
           </div>
 
           {/* Reference Audio */}
-          <div className="bg-slate-900/70 p-5 rounded-xl border border-slate-800 space-y-3">
+          <div className="bg-white p-5 rounded-xl border border-slate-200 shadow-xs space-y-3">
             <div className="flex items-center justify-between">
-              <span className="text-xs font-bold uppercase tracking-wider text-slate-200 flex items-center gap-1.5">
-                <Layers className="w-4 h-4 text-emerald-400" /> Reference Audio (Optional)
+              <span className="text-xs font-bold text-slate-800 flex items-center gap-1.5">
+                <Layers className="w-4 h-4 text-emerald-600" /> Ideal Reference Audio (Optional)
               </span>
-              <span className="text-[10px] text-emerald-400 font-mono">Ideal Model</span>
+              <span className="text-[10px] text-emerald-700 font-mono font-semibold">Model Comparison</span>
             </div>
 
             <input
@@ -255,27 +268,27 @@ export const NewAnalysisPage: React.FC = () => {
               onClick={() => refInputRef.current?.click()}
               className={`border-2 border-dashed rounded-xl p-6 text-center cursor-pointer transition ${
                 referenceFile
-                  ? 'border-emerald-500/50 bg-emerald-500/5'
-                  : 'border-slate-800 hover:border-slate-700 hover:bg-slate-800/40'
+                  ? 'border-emerald-600 bg-emerald-50/50'
+                  : 'border-slate-300 hover:border-emerald-500 hover:bg-emerald-50/20'
               }`}
             >
-              <Upload className="w-6 h-6 text-emerald-400 mx-auto mb-2" />
+              <Upload className="w-6 h-6 text-emerald-600 mx-auto mb-2" />
               {referenceFile ? (
                 <div className="space-y-1">
-                  <div className="text-xs font-bold text-white truncate max-w-xs mx-auto">
+                  <div className="text-xs font-bold text-slate-900 truncate max-w-xs mx-auto">
                     {referenceFile.name}
                   </div>
-                  <div className="text-[10px] text-slate-400 font-mono">
+                  <div className="text-[10px] text-slate-500 font-mono">
                     {(referenceFile.size / (1024 * 1024)).toFixed(2)} MB
                   </div>
                 </div>
               ) : (
                 <div className="space-y-1">
-                  <div className="text-xs font-medium text-slate-300">
-                    Click to upload ideal comparison recording
+                  <div className="text-xs font-medium text-slate-700">
+                    Click to upload ideal model recording
                   </div>
-                  <div className="text-[10px] text-slate-500">
-                    Optional: enables comparative tempo & pitch matching
+                  <div className="text-[10px] text-slate-400">
+                    Optional: enables comparative speed & tone matching
                   </div>
                 </div>
               )}
@@ -288,12 +301,27 @@ export const NewAnalysisPage: React.FC = () => {
         </div>
 
         {/* Transcript Section */}
-        <div className="bg-slate-900/70 p-5 rounded-xl border border-slate-800 space-y-3">
-          <div className="flex items-center justify-between">
-            <span className="text-xs font-bold uppercase tracking-wider text-slate-200 flex items-center gap-1.5">
-              <FileText className="w-4 h-4 text-indigo-400" /> Speech Transcript *
+        <div className="bg-white p-5 rounded-xl border border-slate-200 shadow-xs space-y-3">
+          <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-2">
+            <span className="text-xs font-bold text-blue-950 flex items-center gap-1.5">
+              <FileText className="w-4 h-4 text-blue-900" /> Speech Transcript
+              <span className="text-[10px] text-blue-900 font-mono font-medium bg-blue-50 px-2 py-0.5 rounded border border-blue-200">
+                (optional — auto-generated from audio)
+              </span>
             </span>
-            <div className="flex items-center gap-3">
+
+            <div className="flex items-center gap-2">
+              <button
+                type="button"
+                onClick={handleAutoTranscribe}
+                disabled={isTranscribing || !participantFile}
+                className="flex items-center gap-1.5 px-3 py-1 rounded-lg bg-blue-50 hover:bg-blue-100 text-blue-900 border border-blue-200 text-[11px] font-semibold transition disabled:opacity-40"
+                title="Transcribes the uploaded audio automatically"
+              >
+                <Sparkles className="w-3 h-3 text-amber-500" />
+                <span>{isTranscribing ? 'Transcribing...' : 'Auto-Transcribe from Audio'}</span>
+              </button>
+
               <input
                 type="file"
                 ref={txtInputRef}
@@ -304,9 +332,9 @@ export const NewAnalysisPage: React.FC = () => {
               <button
                 type="button"
                 onClick={() => txtInputRef.current?.click()}
-                className="text-[11px] text-indigo-400 hover:text-indigo-300 font-semibold"
+                className="text-[11px] text-slate-600 hover:text-blue-950 font-medium px-2 py-1"
               >
-                Upload .txt file
+                Upload .txt
               </button>
             </div>
           </div>
@@ -315,40 +343,39 @@ export const NewAnalysisPage: React.FC = () => {
             value={transcriptText}
             onChange={(e) => setTranscriptText(e.target.value)}
             rows={5}
-            placeholder="Paste the exact spoken script or transcript text here for forced alignment..."
-            className="w-full bg-slate-950 border border-slate-800 rounded-lg p-3 text-xs text-slate-200 placeholder-slate-600 focus:outline-none focus:border-indigo-500 font-mono leading-relaxed"
-            required
+            placeholder="Leave blank to automatically transcribe the speech from your audio file, or paste your spoken script here..."
+            className="w-full bg-slate-50 border border-slate-300 rounded-lg p-3 text-xs text-slate-900 placeholder-slate-400 focus:outline-none focus:border-blue-900 focus:bg-white font-mono leading-relaxed"
           />
         </div>
 
-        {/* Metadata & Config Options */}
-        <div className="bg-slate-900/70 p-5 rounded-xl border border-slate-800 space-y-4">
-          <h3 className="text-xs font-bold uppercase tracking-wider text-slate-200">
-            Evaluation Details
+        {/* Details & Config */}
+        <div className="bg-white p-5 rounded-xl border border-slate-200 shadow-xs space-y-4">
+          <h3 className="text-xs font-bold uppercase tracking-wider text-blue-950">
+            Speech Details
           </h3>
 
           <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
             <div>
-              <label className="block text-[11px] font-semibold text-slate-400 mb-1">
+              <label className="block text-[11px] font-semibold text-slate-600 mb-1">
                 Speech Title
               </label>
               <input
                 type="text"
                 value={title}
                 onChange={(e) => setTitle(e.target.value)}
-                placeholder="e.g. State Championship Final Round"
-                className="w-full bg-slate-950 border border-slate-800 rounded-lg px-3 py-2 text-xs text-slate-200 focus:outline-none focus:border-indigo-500"
+                placeholder="e.g. Shakespeare's Hamlet"
+                className="w-full bg-slate-50 border border-slate-300 rounded-lg px-3 py-2 text-xs text-slate-900 focus:outline-none focus:border-blue-900 focus:bg-white"
               />
             </div>
 
             <div>
-              <label className="block text-[11px] font-semibold text-slate-400 mb-1">
+              <label className="block text-[11px] font-semibold text-slate-600 mb-1">
                 Category
               </label>
               <select
                 value={speechCategory}
                 onChange={(e) => setSpeechCategory(e.target.value)}
-                className="w-full bg-slate-950 border border-slate-800 rounded-lg px-3 py-2 text-xs text-slate-200 focus:outline-none focus:border-indigo-500"
+                className="w-full bg-slate-50 border border-slate-300 rounded-lg px-3 py-2 text-xs text-slate-900 focus:outline-none focus:border-blue-900 focus:bg-white"
               >
                 {SPEECH_CATEGORIES.map((cat) => (
                   <option key={cat} value={cat}>
@@ -359,30 +386,30 @@ export const NewAnalysisPage: React.FC = () => {
             </div>
 
             <div>
-              <label className="block text-[11px] font-semibold text-slate-400 mb-1">
-                Speaker / Contestant Identifier
+              <label className="block text-[11px] font-semibold text-slate-600 mb-1">
+                Speaker Name / ID (Optional)
               </label>
               <input
                 type="text"
                 value={speakerId}
                 onChange={(e) => setSpeakerId(e.target.value)}
-                placeholder="e.g. Speaker-401 (Optional)"
-                className="w-full bg-slate-950 border border-slate-800 rounded-lg px-3 py-2 text-xs text-slate-200 focus:outline-none focus:border-indigo-500"
+                placeholder="e.g. Speaker-1"
+                className="w-full bg-slate-50 border border-slate-300 rounded-lg px-3 py-2 text-xs text-slate-900 focus:outline-none focus:border-blue-900 focus:bg-white"
               />
             </div>
           </div>
 
-          <div className="pt-2 border-t border-slate-800 flex items-center justify-between">
+          <div className="pt-2 border-t border-slate-200 flex items-center justify-between">
             <div className="flex items-center gap-2">
               <input
                 type="checkbox"
                 id="gemini-toggle"
                 checked={enableGemini}
                 onChange={(e) => setEnableGemini(e.target.checked)}
-                className="rounded border-slate-700 bg-slate-900 text-indigo-600 focus:ring-0"
+                className="rounded border-slate-300 text-blue-900 focus:ring-0"
               />
-              <label htmlFor="gemini-toggle" className="text-xs text-slate-300 font-medium cursor-pointer">
-                Enable Gemini AI Coaching Interpretation (uses fallback if offline/no key)
+              <label htmlFor="gemini-toggle" className="text-xs text-slate-700 font-medium cursor-pointer">
+                Include AI Delivery Coaching & Speech Context Analysis
               </label>
             </div>
           </div>
@@ -393,9 +420,9 @@ export const NewAnalysisPage: React.FC = () => {
           <button
             type="submit"
             disabled={submitting}
-            className="flex items-center gap-2 px-6 py-2.5 rounded-xl bg-indigo-600 hover:bg-indigo-500 text-white text-xs font-bold shadow-lg shadow-indigo-600/30 transition disabled:opacity-50"
+            className="flex items-center gap-2 px-6 py-2.5 rounded-xl bg-blue-900 hover:bg-blue-800 text-white text-xs font-bold shadow-sm transition disabled:opacity-50"
           >
-            <span>{submitting ? 'Processing Audio & Features...' : 'Run Speech Analysis'}</span>
+            <span>{submitting ? 'Analyzing Speech...' : 'Start Speech Evaluation'}</span>
             <ArrowRight className="w-4 h-4" />
           </button>
         </div>

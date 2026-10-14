@@ -13,6 +13,18 @@ from backend.app.utils.sample_generator import create_sample_preset_data
 # Create tables
 Base.metadata.create_all(bind=engine)
 
+def run_migrations():
+    """Ensure newly added columns exist in existing SQLite databases."""
+    from sqlalchemy import text
+    with engine.connect() as conn:
+        try:
+            conn.execute(text("ALTER TABLE gemini_interpretations ADD COLUMN speech_context_json TEXT;"))
+            conn.commit()
+        except Exception:
+            pass
+
+run_migrations()
+
 from contextlib import asynccontextmanager
 
 @asynccontextmanager
@@ -157,9 +169,15 @@ def startup_seed_data():
                     explanation="Noticeable pause between clause and conjunction."
                 )
             ]
-            for a in annos_2:
-                db.add(a)
+            db.commit()
 
+        # Clean up stale orphaned in-progress analyses from server restarts
+        from backend.app.models.models import SpeechAnalysis
+        stale = db.query(SpeechAnalysis).filter(SpeechAnalysis.status.in_(["queued", "processing"])).all()
+        for s in stale:
+            s.status = "failed"
+            s.error_message = "Analysis interrupted by server restart. Please re-run."
+        if stale:
             db.commit()
     finally:
         db.close()

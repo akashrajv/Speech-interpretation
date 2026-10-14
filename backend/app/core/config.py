@@ -14,8 +14,8 @@ class Settings(BaseSettings):
 
     # Gemini AI
     GEMINI_API_KEY: str = ""
-    GEMINI_MODEL: str = "gemini-2.5-flash"
-    ENABLE_GEMINI: bool = False
+    GEMINI_MODEL: str = "gemini-3.5-flash-lite"
+    ENABLE_GEMINI: bool = True
 
     # Database
     DATABASE_URL: str = "sqlite:///./counterpoint.db"

@@ -15,7 +15,7 @@ export const LoudnessChart: React.FC<LoudnessChartProps> = ({
 }) => {
   if (participantRms.length === 0) {
     return (
-      <div className="h-44 flex items-center justify-center text-slate-500 text-xs italic">
+      <div className="h-44 flex items-center justify-center text-slate-400 text-xs italic">
         Loudness RMS data unavailable.
       </div>
     );
@@ -43,16 +43,16 @@ export const LoudnessChart: React.FC<LoudnessChartProps> = ({
 
   return (
     <div className="space-y-2">
-      <div className="flex items-center justify-between text-xs text-slate-400">
+      <div className="flex items-center justify-between text-xs text-slate-600">
         <div className="flex items-center gap-4">
-          <span className="flex items-center gap-1.5">
-            <span className="w-2.5 h-0.5 bg-indigo-400 rounded" />
-            Participant RMS Energy
+          <span className="flex items-center gap-1.5 font-medium">
+            <span className="w-2.5 h-0.5 bg-blue-900 rounded" />
+            Your Loudness & Volume
           </span>
           {referenceRms.length > 0 && (
-            <span className="flex items-center gap-1.5">
-              <span className="w-2.5 h-0.5 bg-emerald-400 rounded" />
-              Reference RMS Energy
+            <span className="flex items-center gap-1.5 font-medium">
+              <span className="w-2.5 h-0.5 bg-emerald-600 rounded" />
+              Reference Loudness
             </span>
           )}
         </div>
@@ -61,19 +61,19 @@ export const LoudnessChart: React.FC<LoudnessChartProps> = ({
         </span>
       </div>
 
-      <div className="h-44 bg-slate-950/70 rounded-lg p-3 border border-slate-800 relative">
+      <div className="h-44 bg-slate-50 rounded-lg p-3 border border-slate-200 relative">
         <svg viewBox="0 0 1000 180" className="w-full h-full overflow-visible">
-          <line x1="0" y1="40" x2="1000" y2="40" stroke="#1e293b" strokeDasharray="3,3" />
-          <line x1="0" y1="100" x2="1000" y2="100" stroke="#1e293b" strokeDasharray="3,3" />
-          <line x1="0" y1="160" x2="1000" y2="160" stroke="#1e293b" />
+          <line x1="0" y1="40" x2="1000" y2="40" stroke="#cbd5e1" strokeDasharray="3,3" />
+          <line x1="0" y1="100" x2="1000" y2="100" stroke="#cbd5e1" strokeDasharray="3,3" />
+          <line x1="0" y1="160" x2="1000" y2="160" stroke="#94a3b8" />
 
           {refPath && (
             <path
               d={refPath}
               fill="none"
-              stroke="#10b981"
+              stroke="#059669"
               strokeWidth="2"
-              strokeOpacity="0.45"
+              strokeOpacity="0.65"
             />
           )}
 
@@ -81,7 +81,7 @@ export const LoudnessChart: React.FC<LoudnessChartProps> = ({
             <path
               d={partPath}
               fill="none"
-              stroke="#6366f1"
+              stroke="#1e3a8a"
               strokeWidth="2.5"
             />
           )}

@@ -10,9 +10,6 @@ import {
   Mic,
   Activity,
   Sparkles,
-  Server,
-  Layers,
-  ChevronRight
 } from 'lucide-react';
 import { getHealth } from '../services/api';
 import { HealthStatus } from '../types';
@@ -28,29 +25,29 @@ export const AppLayout: React.FC = () => {
   }, [location.pathname]);
 
   const navItems = [
-    { to: '/', label: 'Overview', icon: LayoutDashboard },
-    { to: '/analysis/new', label: 'New Analysis', icon: PlusCircle },
-    { to: '/history', label: 'Analysis History', icon: History },
-    { to: '/dataset', label: 'Dataset Explorer', icon: Database },
-    { to: '/validation', label: 'Model Validation', icon: CheckCircle2 },
+    { to: '/', label: 'Dashboard', icon: LayoutDashboard },
+    { to: '/analysis/new', label: 'Evaluate Speech', icon: PlusCircle },
+    { to: '/history', label: 'Speech History', icon: History },
+    { to: '/dataset', label: 'Speech Library', icon: Database },
+    { to: '/validation', label: 'Accuracy & Quality', icon: CheckCircle2 },
     { to: '/settings', label: 'Settings', icon: Settings },
   ];
 
   return (
-    <div className="flex h-screen bg-[#0a0e17] text-slate-100 overflow-hidden font-sans">
-      {/* Sidebar */}
-      <aside className="w-64 bg-[#0d1322] border-r border-slate-800/80 flex flex-col justify-between select-none z-20">
+    <div className="flex h-screen bg-[#f8fafc] text-slate-900 overflow-hidden font-sans">
+      {/* Sidebar - Crisp White with Deep Dark Blue Elements */}
+      <aside className="w-64 bg-white border-r border-slate-200 flex flex-col justify-between select-none z-20 shadow-xs">
         <div>
           {/* Logo & Brand Header */}
-          <div className="px-6 py-5 border-b border-slate-800/80 flex items-center gap-3">
-            <div className="w-9 h-9 rounded-xl bg-gradient-to-tr from-indigo-600 to-violet-500 flex items-center justify-center shadow-lg shadow-indigo-500/20">
+          <div className="px-6 py-5 border-b border-slate-200 flex items-center gap-3">
+            <div className="w-9 h-9 rounded-xl bg-gradient-to-tr from-blue-900 to-blue-700 flex items-center justify-center shadow-md shadow-blue-900/20">
               <Mic className="w-5 h-5 text-white" />
             </div>
             <div>
-              <div className="font-bold text-base tracking-tight text-white flex items-center gap-1.5">
-                Counterpoint <span className="text-xs px-1.5 py-0.5 rounded font-mono font-medium bg-indigo-500/20 text-indigo-400 border border-indigo-500/30">AI</span>
+              <div className="font-bold text-base tracking-tight text-blue-950 flex items-center gap-1.5">
+                Counterpoint <span className="text-[11px] px-1.5 py-0.5 rounded font-mono font-bold bg-blue-50 text-blue-900 border border-blue-200">AI</span>
               </div>
-              <div className="text-[11px] text-slate-400 font-medium">Temporal Speech Analytics</div>
+              <div className="text-[11px] text-slate-500 font-medium">Speech Delivery Analytics</div>
             </div>
           </div>
 
@@ -66,8 +63,8 @@ export const AppLayout: React.FC = () => {
                   className={({ isActive }) =>
                     `flex items-center gap-3 px-3.5 py-2.5 rounded-lg text-sm font-medium transition-all duration-150 ${
                       isActive
-                        ? 'bg-indigo-600/15 text-indigo-300 border border-indigo-500/30 shadow-sm'
-                        : 'text-slate-400 hover:text-slate-200 hover:bg-slate-800/50 border border-transparent'
+                        ? 'bg-blue-900 text-white font-semibold shadow-sm'
+                        : 'text-slate-600 hover:text-blue-950 hover:bg-blue-50/70 border border-transparent'
                     }`
                   }
                 >
@@ -80,25 +77,25 @@ export const AppLayout: React.FC = () => {
         </div>
 
         {/* System Status Footer */}
-        <div className="p-4 border-t border-slate-800/80 bg-slate-900/40">
-          <div className="text-[11px] font-semibold tracking-wider text-slate-400 uppercase mb-2 flex items-center gap-1.5">
-            <Activity className="w-3.5 h-3.5 text-indigo-400" /> System Status
+        <div className="p-4 border-t border-slate-200 bg-slate-50/80">
+          <div className="text-[11px] font-semibold tracking-wider text-slate-500 uppercase mb-2 flex items-center gap-1.5">
+            <Activity className="w-3.5 h-3.5 text-blue-900" /> System Status
           </div>
           <div className="space-y-1.5 text-xs">
-            <div className="flex items-center justify-between text-slate-300">
+            <div className="flex items-center justify-between text-slate-700">
               <span className="flex items-center gap-1.5">
-                <span className={`w-2 h-2 rounded-full ${health?.database_connected ? 'bg-emerald-500 animate-pulse' : 'bg-rose-500'}`} />
+                <span className={`w-2 h-2 rounded-full ${health?.database_connected ? 'bg-emerald-500' : 'bg-rose-500'}`} />
                 Acoustic Engine
               </span>
-              <span className="text-[11px] font-mono text-emerald-400">v1.0 Ready</span>
+              <span className="text-[11px] font-mono font-semibold text-emerald-600">Ready</span>
             </div>
-            <div className="flex items-center justify-between text-slate-300">
+            <div className="flex items-center justify-between text-slate-700">
               <span className="flex items-center gap-1.5">
-                <Sparkles className="w-3 h-3 text-amber-400" />
-                Gemini Coach
+                <Sparkles className="w-3 h-3 text-amber-500" />
+                Gemini AI Coach
               </span>
-              <span className={`text-[11px] font-mono ${health?.gemini_configured ? 'text-indigo-400' : 'text-slate-500'}`}>
-                {health?.gemini_configured ? 'Active' : 'Fallback'}
+              <span className={`text-[11px] font-mono font-semibold ${health?.gemini_configured ? 'text-blue-900' : 'text-slate-500'}`}>
+                {health?.gemini_configured ? 'Active' : 'Offline'}
               </span>
             </div>
           </div>
@@ -106,21 +103,22 @@ export const AppLayout: React.FC = () => {
       </aside>
 
       {/* Main Content Area */}
-      <main className="flex-1 flex flex-col min-w-0 overflow-y-auto">
-        <header className="h-14 border-b border-slate-800/80 bg-[#0d1322]/80 backdrop-blur sticky top-0 z-10 px-8 flex items-center justify-between">
-          <div className="flex items-center gap-2 text-xs text-slate-400">
-            <Layers className="w-3.5 h-3.5 text-slate-500" />
+      <main className="flex-1 flex flex-col min-w-0 overflow-y-auto bg-[#f8fafc]">
+        <header className="h-14 border-b border-slate-200 bg-white/95 backdrop-blur-md px-6 flex items-center justify-between sticky top-0 z-10 shadow-xs">
+          <div className="flex items-center gap-2 text-xs text-slate-500">
             <span>Counterpoint AI</span>
-            <ChevronRight className="w-3 h-3 text-slate-600" />
-            <span className="text-slate-200 font-medium capitalize">
-              {location.pathname === '/' ? 'Dashboard Overview' : location.pathname.replace('/', '').replace('/', ' / ')}
+            <span>/</span>
+            <span className="capitalize text-blue-950 font-semibold">
+              {location.pathname === '/'
+                ? 'Dashboard'
+                : location.pathname.split('/')[1]?.replace('-', ' ')}
             </span>
           </div>
 
           <div className="flex items-center gap-3">
             <NavLink
               to="/analysis/new"
-              className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-indigo-600 hover:bg-indigo-500 text-white text-xs font-semibold shadow-sm shadow-indigo-600/30 transition-all"
+              className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-blue-900 hover:bg-blue-800 text-white text-xs font-semibold shadow-sm transition"
             >
               <PlusCircle className="w-3.5 h-3.5" />
               <span>Evaluate Speech</span>
@@ -128,7 +126,7 @@ export const AppLayout: React.FC = () => {
           </div>
         </header>
 
-        <div className="flex-1 p-8 max-w-7xl w-full mx-auto">
+        <div className="p-6 max-w-7xl mx-auto w-full flex-1">
           <Outlet />
         </div>
       </main>

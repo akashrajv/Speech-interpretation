@@ -11,6 +11,7 @@ from backend.app.audio.mfcc_analysis import compute_mfcc_features, compute_mfcc_
 from backend.app.audio.pitch_analysis import compute_pitch_features
 from backend.app.audio.pause_detection import detect_pauses
 from backend.app.audio.speaking_rate import compute_speaking_rate, compute_segment_speaking_rates
+from backend.app.audio.transcription import auto_transcribe_audio
 
 __all__ = [
     "validate_audio_file",

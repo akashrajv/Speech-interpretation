@@ -100,10 +100,16 @@ class RubricScoreBreakdown(BaseModel):
     scoring_version: str
 
 # --- Gemini Interpretation Schemas ---
+class SpeechContextAnalysis(BaseModel):
+    theme_and_intent: str
+    dramatic_or_rhetorical_stakes: str
+    contextual_delivery_advice: str
+
 class FlawInterpretation(BaseModel):
     flaw_id: str
     explanation: str
     impact: str
+    contextual_significance: Optional[str] = None
     recommendations: List[str]
     practice_exercise: str
     priority: str
@@ -112,6 +118,7 @@ class GeminiInterpretationResponse(BaseModel):
     model_used: str
     is_deterministic_fallback: bool
     summary: str
+    speech_context: Optional[SpeechContextAnalysis] = None
     strengths: List[str] = []
     interpretations: List[FlawInterpretation] = []
     overall_recommendations: List[str] = []

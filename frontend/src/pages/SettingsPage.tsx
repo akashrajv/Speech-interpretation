@@ -97,39 +97,39 @@ export const SettingsPage: React.FC = () => {
   return (
     <div className="max-w-4xl mx-auto space-y-6">
       <div className="space-y-1">
-        <h1 className="text-2xl font-bold text-white tracking-tight">System & AI Configuration</h1>
-        <p className="text-xs text-slate-400">
+        <h1 className="text-2xl font-bold text-blue-950 tracking-tight">System & AI Configuration</h1>
+        <p className="text-xs text-slate-500">
           Manage Google Gemini credentials, acoustic detection thresholds, and rubric weights.
         </p>
       </div>
 
       {savedMsg && (
-        <div className="p-4 rounded-xl bg-emerald-500/10 border border-emerald-500/30 text-emerald-300 text-xs flex items-center gap-2">
-          <CheckCircle2 className="w-4 h-4 text-emerald-400" />
+        <div className="p-4 rounded-xl bg-emerald-50 border border-emerald-200 text-emerald-700 text-xs flex items-center gap-2">
+          <CheckCircle2 className="w-4 h-4 text-emerald-600" />
           <span>Configuration updated successfully.</span>
         </div>
       )}
 
       <form onSubmit={handleSave} className="space-y-6">
         {/* Gemini AI Settings Card */}
-        <div className="bg-slate-900/60 p-6 rounded-xl border border-slate-800 space-y-4">
+        <div className="bg-white p-6 rounded-xl border border-slate-200 shadow-xs space-y-4">
           <div className="flex items-center justify-between">
-            <h3 className="text-sm font-bold text-white flex items-center gap-2">
-              <Sparkles className="w-4 h-4 text-amber-400" /> Google Gemini API Integration
+            <h3 className="text-sm font-bold text-blue-950 flex items-center gap-2">
+              <Sparkles className="w-4 h-4 text-amber-500" /> Google Gemini AI Integration
             </h3>
             <span
               className={`text-[10px] font-mono font-semibold px-2 py-0.5 rounded-full border ${
                 settings?.gemini_configured
-                  ? 'bg-emerald-500/10 text-emerald-400 border-emerald-500/30'
-                  : 'bg-slate-800 text-slate-400 border-slate-700'
+                  ? 'bg-emerald-50 text-emerald-700 border-emerald-200'
+                  : 'bg-slate-100 text-slate-600 border-slate-200'
               }`}
             >
               {settings?.gemini_configured ? 'API Key Configured' : 'No Key (Deterministic Fallback)'}
             </span>
           </div>
 
-          <p className="text-xs text-slate-400 leading-relaxed">
-            When enabled, Google Gemini provides evidence-grounded coaching interpretations and vocal exercises based solely on the mathematically extracted acoustic evidence. Audio stays local by default.
+          <p className="text-xs text-slate-600 leading-relaxed">
+            When enabled, Google Gemini provides context-grounded coaching interpretations and vocal exercises based solely on the mathematically extracted acoustic evidence. Audio stays local by default.
           </p>
 
           <div className="space-y-3 pt-2">
@@ -139,43 +139,44 @@ export const SettingsPage: React.FC = () => {
                 id="enable-gemini"
                 checked={enableGemini}
                 onChange={(e) => setEnableGemini(e.target.checked)}
-                className="rounded border-slate-700 bg-slate-950 text-indigo-600 focus:ring-0"
+                className="rounded border-slate-300 text-blue-900 focus:ring-0"
               />
-              <label htmlFor="enable-gemini" className="text-xs font-semibold text-slate-200 cursor-pointer">
-                Enable Gemini AI Coaching Interpretation
+              <label htmlFor="enable-gemini" className="text-xs font-semibold text-slate-700 cursor-pointer">
+                Enable Gemini AI Coaching & Context Analysis
               </label>
             </div>
 
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4 pt-2">
               <div>
-                <label className="block text-xs font-semibold text-slate-400 mb-1">
+                <label className="block text-xs font-semibold text-slate-600 mb-1">
                   Gemini API Key
                 </label>
                 <div className="relative">
-                  <Key className="w-4 h-4 text-slate-500 absolute left-3 top-1/2 -translate-y-1/2" />
+                  <Key className="w-4 h-4 text-slate-400 absolute left-3 top-1/2 -translate-y-1/2" />
                   <input
                     type="password"
                     placeholder={settings?.gemini_configured ? '••••••••••••••••••••••••' : 'AIzaSy...'}
                     value={geminiKeyInput}
                     onChange={(e) => setGeminiKeyInput(e.target.value)}
-                    className="w-full bg-slate-950 border border-slate-800 rounded-lg pl-9 pr-3 py-2 text-xs text-slate-200 focus:outline-none focus:border-indigo-500"
+                    className="w-full bg-slate-50 border border-slate-300 rounded-lg pl-9 pr-3 py-2 text-xs text-slate-900 focus:outline-none focus:border-blue-900 focus:bg-white"
                   />
                 </div>
-                <span className="text-[10px] text-slate-500 mt-1 block">
+                <span className="text-[10px] text-slate-400 mt-1 block">
                   Keys are stored securely in environment variables and never exposed to the client.
                 </span>
               </div>
 
               <div>
-                <label className="block text-xs font-semibold text-slate-400 mb-1">
+                <label className="block text-xs font-semibold text-slate-600 mb-1">
                   Gemini Model
                 </label>
                 <select
                   value={selectedModel}
                   onChange={(e) => setSelectedModel(e.target.value)}
-                  className="w-full bg-slate-950 border border-slate-800 rounded-lg px-3 py-2 text-xs text-slate-200 focus:outline-none focus:border-indigo-500"
+                  className="w-full bg-slate-50 border border-slate-300 rounded-lg px-3 py-2 text-xs text-slate-900 focus:outline-none focus:border-blue-900 focus:bg-white"
                 >
-                  <option value="gemini-2.5-flash">gemini-2.5-flash (Recommended)</option>
+                  <option value="gemini-3.5-flash-lite">gemini-3.5-flash-lite (Active)</option>
+                  <option value="gemini-2.5-flash">gemini-2.5-flash</option>
                   <option value="gemini-1.5-flash">gemini-1.5-flash</option>
                   <option value="gemini-1.5-pro">gemini-1.5-pro</option>
                 </select>
@@ -185,27 +186,27 @@ export const SettingsPage: React.FC = () => {
         </div>
 
         {/* Rubric Weights Configuration */}
-        <div className="bg-slate-900/60 p-6 rounded-xl border border-slate-800 space-y-4">
+        <div className="bg-white p-6 rounded-xl border border-slate-200 shadow-xs space-y-4">
           <div className="flex items-center justify-between">
-            <h3 className="text-sm font-bold text-white flex items-center gap-2">
-              <Sliders className="w-4 h-4 text-indigo-400" /> Rubric Dimension Weights
+            <h3 className="text-sm font-bold text-blue-950 flex items-center gap-2">
+              <Sliders className="w-4 h-4 text-blue-900" /> Rubric Dimension Weights
             </h3>
             <span
               className={`text-xs font-mono font-semibold ${
-                Math.abs(weightSum - 1.0) < 0.01 ? 'text-emerald-400' : 'text-amber-400'
+                Math.abs(weightSum - 1.0) < 0.01 ? 'text-emerald-700' : 'text-amber-700'
               }`}
             >
               Total Sum: {(weightSum * 100).toFixed(0)}%
             </span>
           </div>
 
-          <p className="text-xs text-slate-400 leading-relaxed">
+          <p className="text-xs text-slate-600 leading-relaxed">
             Customize the relative weights for composite speech scoring. Dimension scores are calculated from acoustic evidence and normalized to 100%.
           </p>
 
           <div className="grid grid-cols-1 sm:grid-cols-5 gap-3 pt-2">
             <div className="space-y-1">
-              <label className="text-[11px] font-semibold text-slate-300">Pacing ({(wPacing * 100).toFixed(0)}%)</label>
+              <label className="text-[11px] font-semibold text-slate-700">Pacing ({(wPacing * 100).toFixed(0)}%)</label>
               <input
                 type="number"
                 step="0.05"
@@ -213,12 +214,12 @@ export const SettingsPage: React.FC = () => {
                 max="1"
                 value={wPacing}
                 onChange={(e) => setWPacing(parseFloat(e.target.value) || 0)}
-                className="w-full bg-slate-950 border border-slate-800 rounded p-2 text-xs text-slate-200 font-mono"
+                className="w-full bg-slate-50 border border-slate-300 rounded p-2 text-xs text-slate-900 font-mono focus:border-blue-900 focus:bg-white"
               />
             </div>
 
             <div className="space-y-1">
-              <label className="text-[11px] font-semibold text-slate-300">Pitch ({(wPitch * 100).toFixed(0)}%)</label>
+              <label className="text-[11px] font-semibold text-slate-700">Pitch ({(wPitch * 100).toFixed(0)}%)</label>
               <input
                 type="number"
                 step="0.05"
@@ -226,12 +227,12 @@ export const SettingsPage: React.FC = () => {
                 max="1"
                 value={wPitch}
                 onChange={(e) => setWPitch(parseFloat(e.target.value) || 0)}
-                className="w-full bg-slate-950 border border-slate-800 rounded p-2 text-xs text-slate-200 font-mono"
+                className="w-full bg-slate-50 border border-slate-300 rounded p-2 text-xs text-slate-900 font-mono focus:border-blue-900 focus:bg-white"
               />
             </div>
 
             <div className="space-y-1">
-              <label className="text-[11px] font-semibold text-slate-300">Volume ({(wVolume * 100).toFixed(0)}%)</label>
+              <label className="text-[11px] font-semibold text-slate-700">Volume ({(wVolume * 100).toFixed(0)}%)</label>
               <input
                 type="number"
                 step="0.05"
@@ -239,12 +240,12 @@ export const SettingsPage: React.FC = () => {
                 max="1"
                 value={wVolume}
                 onChange={(e) => setWVolume(parseFloat(e.target.value) || 0)}
-                className="w-full bg-slate-950 border border-slate-800 rounded p-2 text-xs text-slate-200 font-mono"
+                className="w-full bg-slate-50 border border-slate-300 rounded p-2 text-xs text-slate-900 font-mono focus:border-blue-900 focus:bg-white"
               />
             </div>
 
             <div className="space-y-1">
-              <label className="text-[11px] font-semibold text-slate-300">Pronunciation ({(wPron * 100).toFixed(0)}%)</label>
+              <label className="text-[11px] font-semibold text-slate-700">Pronunciation ({(wPron * 100).toFixed(0)}%)</label>
               <input
                 type="number"
                 step="0.05"
@@ -252,12 +253,12 @@ export const SettingsPage: React.FC = () => {
                 max="1"
                 value={wPron}
                 onChange={(e) => setWPron(parseFloat(e.target.value) || 0)}
-                className="w-full bg-slate-950 border border-slate-800 rounded p-2 text-xs text-slate-200 font-mono"
+                className="w-full bg-slate-50 border border-slate-300 rounded p-2 text-xs text-slate-900 font-mono focus:border-blue-900 focus:bg-white"
               />
             </div>
 
             <div className="space-y-1">
-              <label className="text-[11px] font-semibold text-slate-300">Emphasis ({(wEmp * 100).toFixed(0)}%)</label>
+              <label className="text-[11px] font-semibold text-slate-700">Emphasis ({(wEmp * 100).toFixed(0)}%)</label>
               <input
                 type="number"
                 step="0.05"
@@ -265,37 +266,37 @@ export const SettingsPage: React.FC = () => {
                 max="1"
                 value={wEmp}
                 onChange={(e) => setWEmp(parseFloat(e.target.value) || 0)}
-                className="w-full bg-slate-950 border border-slate-800 rounded p-2 text-xs text-slate-200 font-mono"
+                className="w-full bg-slate-50 border border-slate-300 rounded p-2 text-xs text-slate-900 font-mono focus:border-blue-900 focus:bg-white"
               />
             </div>
           </div>
         </div>
 
         {/* Model & System Health Checks */}
-        <div className="bg-slate-900/60 p-6 rounded-xl border border-slate-800 space-y-3">
-          <h3 className="text-sm font-bold text-white flex items-center gap-2">
-            <Activity className="w-4 h-4 text-emerald-400" /> Model Availability & Health Checks
+        <div className="bg-white p-6 rounded-xl border border-slate-200 shadow-xs space-y-3">
+          <h3 className="text-sm font-bold text-blue-950 flex items-center gap-2">
+            <Activity className="w-4 h-4 text-emerald-600" /> Model Availability & Health Checks
           </h3>
 
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 text-xs pt-1">
-            <div className="p-3 rounded-lg bg-slate-950 border border-slate-800 space-y-1">
-              <span className="text-slate-400 font-semibold">Voice Activity Detection</span>
-              <div className="text-slate-200 font-mono">{modelStatus?.vad_status}</div>
+            <div className="p-3 rounded-lg bg-slate-50 border border-slate-200 space-y-1">
+              <span className="text-slate-500 font-semibold">Voice Activity Detection</span>
+              <div className="text-slate-800 font-mono font-medium">{modelStatus?.vad_status}</div>
             </div>
 
-            <div className="p-3 rounded-lg bg-slate-950 border border-slate-800 space-y-1">
-              <span className="text-slate-400 font-semibold">Pitch Contour Estimator</span>
-              <div className="text-slate-200 font-mono">{modelStatus?.pitch_estimator}</div>
+            <div className="p-3 rounded-lg bg-slate-50 border border-slate-200 space-y-1">
+              <span className="text-slate-500 font-semibold">Pitch Contour Estimator</span>
+              <div className="text-slate-800 font-mono font-medium">{modelStatus?.pitch_estimator}</div>
             </div>
 
-            <div className="p-3 rounded-lg bg-slate-950 border border-slate-800 space-y-1">
-              <span className="text-slate-400 font-semibold">Forced Syllable Aligner</span>
-              <div className="text-slate-200 font-mono">{modelStatus?.forced_aligner}</div>
+            <div className="p-3 rounded-lg bg-slate-50 border border-slate-200 space-y-1">
+              <span className="text-slate-500 font-semibold">Forced Syllable Aligner</span>
+              <div className="text-slate-800 font-mono font-medium">{modelStatus?.forced_aligner}</div>
             </div>
 
-            <div className="p-3 rounded-lg bg-slate-950 border border-slate-800 space-y-1">
-              <span className="text-slate-400 font-semibold">Gemini AI Coach</span>
-              <div className="text-slate-200 font-mono">{modelStatus?.gemini_status}</div>
+            <div className="p-3 rounded-lg bg-slate-50 border border-slate-200 space-y-1">
+              <span className="text-slate-500 font-semibold">Gemini AI Coach</span>
+              <div className="text-slate-800 font-mono font-medium">{modelStatus?.gemini_status}</div>
             </div>
           </div>
         </div>
@@ -305,7 +306,7 @@ export const SettingsPage: React.FC = () => {
           <button
             type="submit"
             disabled={saving}
-            className="flex items-center gap-2 px-6 py-2.5 rounded-xl bg-indigo-600 hover:bg-indigo-500 text-white text-xs font-bold shadow-lg shadow-indigo-600/30 transition disabled:opacity-50"
+            className="flex items-center gap-2 px-6 py-2.5 rounded-xl bg-blue-900 hover:bg-blue-800 text-white text-xs font-bold shadow-sm transition disabled:opacity-50"
           >
             <Save className="w-4 h-4" />
             <span>{saving ? 'Saving...' : 'Save Configuration'}</span>

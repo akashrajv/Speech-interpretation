@@ -1,0 +1,57 @@
+# Counterpoint AI: Implementation & Execution Plan
+
+## 1. System State & Progress Audit
+
+| Layer | Component | Status | Verification Detail |
+| :--- | :--- | :--- | :--- |
+| **Audio Processing** | 16kHz Preprocessing, F0 Pitch, RMS, Pauses, MFCC | ✅ Complete | Verified in `backend/app/audio/` |
+| **Alignment** | Word & Syntactic Phrase Mapping | ✅ Complete | Verified in `backend/app/alignment/` |
+| **Flaw Detection** | Rate, Pause, Pitch, Loudness, Pronunciation, Acoustic | ✅ Complete | 6 detectors unified in `flaw_merger.py` |
+| **Scoring Engine** | 5-Dimension Calibrated Rubric | ✅ Complete | `backend/app/scoring/rubric_engine.py` |
+| **AI Speech Coach** | Gemini Multimodal Coach + Deterministic Fallback | ✅ Complete | `backend/app/feedback/gemini_interpreter.py` |
+| **Auto Transcription** | Gemini Multimodal Audio Transcription | ✅ Complete | `backend/app/audio/transcription.py` |
+| **REST API** | FastAPI Endpoints, Audio Streaming, Reports | ✅ Complete | `backend/app/api/endpoints.py` |
+| **Frontend UI** | Vite + React + Tailwind + Recharts | ✅ Complete | Build passes (`tsc` & Vite chunking clean) |
+| **Evaluation** | Temporal IoU, Precision/Recall/F1 Benchmarking | ✅ Complete | `backend/app/evaluation/metrics.py` |
+| **Automated Tests** | Pytest Suite | ⚠️ 1 Failure | 14/15 passing; sample endpoint async polling mismatch |
+
+---
+
+## 2. Immediate Implementation Phases
+
+### Phase 1: Test Suite Fix & API Hardening
+- **Objective**: Achieve 100% test pass rate across all unit and API integration tests.
+- **Action Items**:
+  1. Update `POST /api/analyses/sample` in [endpoints.py](file:///d:/Speech%20interpreter/backend/app/api/endpoints.py) to support an optional `sync: bool = False` query parameter.
+  2. In [test_gemini_and_api.py](file:///d:/Speech%20interpreter/backend/tests/test_gemini_and_api.py#L64), call `/api/analyses/sample?sample_key=script_1&sync=true` so test execution completes synchronously without flaky polling.
+  3. Re-run `py -m pytest` and verify all 15 tests pass.
+
+### Phase 2: Environment Configuration & AI Fallback Assurance
+- **Objective**: Seamless operation both with and without a valid Google Gemini API key.
+- **Action Items**:
+  1. Inspect [.env](file:///d:/Speech%20interpreter/.env) and [.env.example](file:///d:/Speech%20interpreter/.env.example) for required configuration flags (`GEMINI_API_KEY`, `ENABLE_GEMINI`, `DATABASE_URL`, `CORS_ORIGINS`).
+  2. Validate that when `GEMINI_API_KEY` is not present, the system defaults smoothly to the rule-based acoustic interpretation and provides actionable coaching tips.
+
+### Phase 3: Benchmark Dataset & Model Validation Verification
+- **Objective**: Ensure the Temporal Flaw Finding Benchmark (IoU $\ge 0.30$) works reliably.
+- **Action Items**:
+  1. Verify seed dataset in [seed_dataset.py](file:///d:/Speech%20interpreter/backend/app/dataset/seed_dataset.py).
+  2. Test `GET /api/dataset/samples` and `POST /api/dataset/evaluate` to confirm precision, recall, and category-level confusion matrix are correctly computed.
+  3. Verify the frontend **Model Validation** page renders IoU gauges and category metrics.
+
+### Phase 4: Full-Stack Integration & Live Playback Verification
+- **Objective**: Validate the full end-to-end interactive workflow in the browser.
+- **Action Items**:
+  1. Start FastAPI backend (`py -m uvicorn backend.app.main:app --port 8000 --reload`).
+  2. Start Vite dev server (`npm --prefix frontend run dev`).
+  3. Validate core UI views:
+     - **Overview / Dashboard**: Recent evaluations and score distributions.
+     - **New Analysis**: Audio upload, optional Gemini transcription, and speech context selection.
+     - **Analysis Results**: Multi-track waveform player, synchronized flaw markers, 5-dimension rubric gauges, and AI Speech Context card.
+     - **History & Export**: JSON and CSV export verification.
+
+### Phase 5: Production Launch & Automation Scripting
+- **Objective**: Provide single-command execution scripts for local deployment.
+- **Action Items**:
+  1. Create `start.ps1` (or `start.bat`) script that initializes virtual environment dependencies, verifies database migrations, and launches both frontend and backend concurrently.
+  2. Review and update [README.md](file:///d:/Speech%20interpreter/README.md) with complete quickstart instructions.
