@@ -26,6 +26,7 @@ import { LoudnessChart } from '../charts/LoudnessChart';
 import { PauseTimelineChart } from '../charts/PauseTimelineChart';
 import { SpectrogramChart } from '../charts/SpectrogramChart';
 import { SpeechContextCard } from '../components/SpeechContextCard';
+import { PersonalizedReportModal } from '../components/PersonalizedReportModal';
 
 export const AnalysisResultsPage: React.FC = () => {
   const { id } = useParams<{ id: string }>();
@@ -34,6 +35,7 @@ export const AnalysisResultsPage: React.FC = () => {
   const [selectedFlaw, setSelectedFlaw] = useState<FlawItem | null>(null);
   const [currentTime, setCurrentTime] = useState<number>(0);
   const [activeTab, setActiveTab] = useState<'flaws' | 'charts' | 'transcript'>('flaws');
+  const [showReportModal, setShowReportModal] = useState(false);
 
   useEffect(() => {
     if (!id) return;
@@ -130,7 +132,14 @@ export const AnalysisResultsPage: React.FC = () => {
         </div>
 
         {/* Action Buttons */}
-        <div className="flex items-center gap-2 shrink-0">
+        <div className="flex flex-wrap items-center gap-2 shrink-0">
+          <button
+            onClick={() => setShowReportModal(true)}
+            className="flex items-center gap-1.5 px-3.5 py-1.5 rounded-lg bg-blue-900 hover:bg-blue-800 text-white text-xs font-bold shadow-sm transition"
+          >
+            <Sparkles className="w-3.5 h-3.5 text-amber-400" />
+            <span>Generate Personalised Report</span>
+          </button>
           <a
             href={getExportUrl(analysis.id, 'json')}
             download
@@ -373,6 +382,15 @@ export const AnalysisResultsPage: React.FC = () => {
           </div>
         )}
       </div>
+
+      {/* Personalised Report Dossier Modal */}
+      {analysis && (
+        <PersonalizedReportModal
+          analysis={analysis}
+          isOpen={showReportModal}
+          onClose={() => setShowReportModal(false)}
+        />
+      )}
     </div>
   );
 };

@@ -9,6 +9,8 @@ import {
   DatasetSample,
   ValidationReport,
   SettingsData,
+  PersonalizedReportRequest,
+  PersonalizedReportResponse,
 } from '../types';
 
 const api = axios.create({
@@ -80,6 +82,26 @@ export const deleteAnalysis = async (id: string): Promise<{ deleted: boolean }> 
 
 export const getExportUrl = (id: string, format: 'json' | 'csv'): string => {
   return `/api/analyses/${id}/report?format=${format}`;
+};
+
+export const generatePersonalizedReport = async (
+  analysisId: string,
+  data?: PersonalizedReportRequest
+): Promise<PersonalizedReportResponse> => {
+  const res = await api.post(`/analyses/${analysisId}/personalized-report`, data || {});
+  return res.data;
+};
+
+export const getPersonalizedReportExportUrl = (
+  analysisId: string,
+  params: { speakerName?: string; targetGoal?: string; coachingTone?: string; format?: 'html' | 'json' } = {}
+): string => {
+  const q = new URLSearchParams();
+  if (params.speakerName) q.set('speaker_name', params.speakerName);
+  if (params.targetGoal) q.set('target_goal', params.targetGoal);
+  if (params.coachingTone) q.set('coaching_tone', params.coachingTone);
+  if (params.format) q.set('format', params.format);
+  return `/api/analyses/${analysisId}/personalized-report/export?${q.toString()}`;
 };
 
 export const getAudioStreamUrl = (analysisId: string, role: 'participant' | 'reference'): string => {
