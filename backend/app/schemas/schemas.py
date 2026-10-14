@@ -260,3 +260,38 @@ class SettingsUpdateRequest(BaseModel):
     weight_volume: Optional[float] = None
     weight_pronunciation: Optional[float] = None
     weight_emphasis: Optional[float] = None
+
+# --- Personalised Report Schemas ---
+class PersonalizedReportRequest(BaseModel):
+    speaker_name: Optional[str] = "Speaker"
+    target_goal: Optional[str] = "Public Speaking & Presentation Excellence"
+    coaching_tone: Optional[str] = "balanced"  # balanced, competition, executive
+    custom_notes: Optional[str] = None
+
+class PracticeDayPlan(BaseModel):
+    day_label: str
+    focus_area: str
+    drill_title: str
+    instructions: str
+    target_metric: str
+
+class PersonalizedReportResponse(BaseModel):
+    report_id: str
+    analysis_id: str
+    generated_at: datetime
+    speaker_name: str
+    speech_title: str
+    speech_category: str
+    target_goal: str
+    duration_seconds: float
+    overall_score: float
+    grade_letter: str
+    performance_verdict: str
+    executive_assessment: str
+    speech_meaning_context: Optional[str] = None
+    strengths: List[str] = []
+    priority_flaws: List[FlawItem] = []
+    rubric_breakdown: Optional[RubricScoreBreakdown] = None
+    action_routine: List[PracticeDayPlan] = []
+    adjudication_notes: List[str] = []
+

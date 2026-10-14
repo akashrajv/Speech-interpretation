@@ -8,7 +8,7 @@ from typing import List, Optional
 from datetime import datetime
 
 from fastapi import APIRouter, Depends, HTTPException, UploadFile, File, Form, BackgroundTasks, Query
-from fastapi.responses import FileResponse, StreamingResponse, JSONResponse
+from fastapi.responses import FileResponse, StreamingResponse, JSONResponse, Response
 from sqlalchemy.orm import Session
 from sqlalchemy import func, desc
 
@@ -48,8 +48,11 @@ from backend.app.schemas.schemas import (
     ValidationReportResponse,
     SettingsResponse,
     SettingsUpdateRequest,
+    PersonalizedReportRequest,
+    PersonalizedReportResponse,
 )
 from backend.app.services.analysis_service import run_speech_analysis_pipeline
+from backend.app.services.report_service import generate_personalized_report_data, generate_personalized_html_report
 from backend.app.evaluation.metrics import evaluate_flaw_detections
 from backend.app.utils.sample_generator import create_sample_preset_data
 
@@ -585,6 +588,45 @@ def export_analysis_report(
             media_type="text/csv",
             headers={"Content-Disposition": f"attachment; filename=counterpoint_report_{analysis_id}.csv"}
         )
+
+@router.post("/analyses/{analysis_id}/personalized-report", response_model=PersonalizedReportResponse)
+def create_personalized_report(
+    analysis_id: str,
+    req: PersonalizedReportRequest = None,
+    db: Session = Depends(get_db)
+):
+    """Generates an individualized, evidence-grounded personalized report for the speaker."""
+    if req is None:
+        req = PersonalizedReportRequest()
+    detail = get_analysis_detail(analysis_id, db)
+    return generate_personalized_report_data(detail, req)
+
+@router.get("/analyses/{analysis_id}/personalized-report/export")
+def export_personalized_report(
+    analysis_id: str,
+    speaker_name: str = Query("Speaker"),
+    target_goal: str = Query("Public Speaking Excellence"),
+    coaching_tone: str = Query("balanced"),
+    format: str = Query("html", pattern="^(html|json)$"),
+    db: Session = Depends(get_db)
+):
+    """Exports or views the personalized coaching dossier in standalone HTML or JSON format."""
+    detail = get_analysis_detail(analysis_id, db)
+    req = PersonalizedReportRequest(
+        speaker_name=speaker_name,
+        target_goal=target_goal,
+        coaching_tone=coaching_tone
+    )
+    report_data = generate_personalized_report_data(detail, req)
+
+    if format == "json":
+        return JSONResponse(
+            content=report_data.model_dump(mode="json"),
+            headers={"Content-Disposition": f"attachment; filename=personalized_report_{analysis_id}.json"}
+        )
+    else:
+        html_content = generate_personalized_html_report(report_data)
+        return Response(content=html_content, media_type="text/html")
 
 @router.get("/analyses/{analysis_id}/audio/{role}")
 def stream_audio(analysis_id: str, role: str, db: Session = Depends(get_db)):

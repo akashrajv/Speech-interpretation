@@ -250,3 +250,40 @@ export interface SettingsData {
   max_upload_size_mb: number;
   max_audio_duration_seconds: number;
 }
+
+export interface PracticeDayPlan {
+  day_label: string;
+  focus_area: string;
+  drill_title: string;
+  instructions: string;
+  target_metric: string;
+}
+
+export interface PersonalizedReportRequest {
+  speaker_name?: string;
+  target_goal?: string;
+  coaching_tone?: string;
+  custom_notes?: string;
+}
+
+export interface PersonalizedReportResponse {
+  report_id: string;
+  analysis_id: string;
+  generated_at: string;
+  speaker_name: string;
+  speech_title: string;
+  speech_category: string;
+  target_goal: string;
+  duration_seconds: number;
+  overall_score: number;
+  grade_letter: string;
+  performance_verdict: string;
+  executive_assessment: string;
+  speech_meaning_context?: string;
+  strengths: string[];
+  priority_flaws: FlawItem[];
+  rubric_breakdown?: RubricScoreBreakdown;
+  action_routine: PracticeDayPlan[];
+  adjudication_notes: string[];
+}
+
