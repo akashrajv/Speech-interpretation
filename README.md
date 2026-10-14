@@ -1,4 +1,7 @@
-# Counterpoint AI — Speech Analytics & Temporal Flaw Finding
+# team-phoenix-akashraj — Counterpoint AI
+
+> **StartupFair Hackathon:** Team Phoenix Akashraj  
+> **Project:** Counterpointing Speech Analytics & Temporal Flaw Finding
 
 Counterpoint AI is a full-stack, research-grade speech evaluation platform. It evaluates competitive speech deliveries by comparing a participant's recording with an ideal reference recording of the exact same transcript. The system identifies delivery flaws, isolates start and end timestamps, explains the mathematical evidence behind each deviation, calculates reproducible rubric-based scores (0–100), and provides actionable coaching recommendations powered by Google's Gemini API with an automatic deterministic fallback.
 
